@@ -22,6 +22,7 @@ public class DataManager : MonoBehaviour
 
         Instance = this;
         DontDestroyOnLoad(gameObject);
+        LoadData();
     }
 
 
@@ -31,6 +32,7 @@ public class DataManager : MonoBehaviour
         {
             bestScore = score;
             bestPlayer = playerName;
+            SaveData();
         }
     }
 
@@ -41,5 +43,31 @@ public class DataManager : MonoBehaviour
     public void SetPlayerName(string name)
     {
         Instance.playerName = name;
+    }
+
+    [Serializable]
+    class TheBest
+    {
+        public long score;
+        public string name;
+    }
+
+    public void SaveData()
+    {
+        var userData = new TheBest() { score = Instance.bestScore, name = Instance.bestPlayer };
+        var jsonData = JsonUtility.ToJson(userData);
+        File.WriteAllText(Path.Combine(Application.persistentDataPath, "userData.json"), jsonData);
+    }
+
+    public void LoadData()
+    {
+        var userDataFile = Path.Combine(Application.persistentDataPath, "userData.json");
+        if (File.Exists(userDataFile))
+        {
+            var jsonData = File.ReadAllText(userDataFile);
+            var userData = JsonUtility.FromJson<TheBest>(jsonData);
+            bestScore = userData.score;
+            bestPlayer = userData.name;
+        }
     }
 }
